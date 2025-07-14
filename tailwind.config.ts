@@ -67,12 +67,14 @@ export default {
 			backgroundImage: {
 				'gradient-hero': 'var(--gradient-hero)',
 				'gradient-card': 'var(--gradient-card)',
-				'gradient-accent': 'var(--gradient-accent)'
+				'gradient-accent': 'var(--gradient-accent)',
+				'gradient-secondary': 'var(--gradient-secondary)'
 			},
 			boxShadow: {
 				'book': 'var(--shadow-book)',
 				'card': 'var(--shadow-card)',
-				'glow': 'var(--shadow-glow)'
+				'glow': 'var(--shadow-glow)',
+				'secondary': 'var(--shadow-secondary)'
 			},
 			transitionTimingFunction: {
 				'smooth': 'var(--transition-smooth)',

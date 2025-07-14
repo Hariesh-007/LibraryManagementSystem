@@ -21,12 +21,12 @@ const HeroSection = () => {
         <div className="max-w-4xl mx-auto text-center text-primary-foreground">
           {/* Main Heading */}
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-            Smart Library
-            <span className="block text-accent">Management</span>
+            KL University
+            <span className="block text-accent">Smart Library</span>
           </h1>
           
           <p className="text-xl md:text-2xl mb-8 text-primary-foreground/90 max-w-2xl mx-auto leading-relaxed">
-            Discover, learn, and manage your academic resources with our intelligent library platform
+            Empowering KL University students and faculty with intelligent library resources and cutting-edge research tools
           </p>
 
           {/* Hero Search Bar */}

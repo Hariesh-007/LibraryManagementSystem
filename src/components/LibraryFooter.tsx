@@ -24,10 +24,10 @@ const LibraryFooter = () => {
             <div className="lg:col-span-1">
               <div className="flex items-center space-x-2 mb-6">
                 <BookOpen className="h-8 w-8 text-accent" />
-                <span className="text-2xl font-bold">SmartLibrary</span>
+                <span className="text-2xl font-bold">KL SmartLibrary</span>
               </div>
               <p className="text-primary-foreground/80 mb-6 leading-relaxed">
-                Empowering learning through intelligent library management. Discover, learn, and grow with our comprehensive academic resources.
+                Empowering KL University's academic community through intelligent library management and innovative learning resources.
               </p>
               <div className="flex space-x-4">
                 <Button variant="ghost" size="sm" className="text-primary-foreground hover:text-accent hover:bg-primary-foreground/10">
@@ -77,15 +77,15 @@ const LibraryFooter = () => {
               <div className="space-y-4 text-primary-foreground/80">
                 <div className="flex items-start space-x-3">
                   <MapPin className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                  <span>123 University Ave<br />Academic Building, Floor 2<br />College Campus, State 12345</span>
+                  <span>KL University Campus<br />Green Fields, Vaddeswaram<br />Guntur, Andhra Pradesh 522302</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <Phone className="h-5 w-5 text-accent" />
-                  <span>(555) 123-4567</span>
+                  <span>+91 863 2344 700</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <Mail className="h-5 w-5 text-accent" />
-                  <span>library@college.edu</span>
+                  <span>library@kluniversity.in</span>
                 </div>
                 <div className="flex items-start space-x-3">
                   <Clock className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
@@ -126,7 +126,7 @@ const LibraryFooter = () => {
         <div className="py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-primary-foreground/60">
             <div>
-              © 2024 SmartLibrary Management System. All rights reserved.
+              © 2024 KL University Smart Library Management System. All rights reserved.
             </div>
             <div className="flex space-x-6">
               <a href="#" className="hover:text-accent transition-smooth">Privacy Policy</a>

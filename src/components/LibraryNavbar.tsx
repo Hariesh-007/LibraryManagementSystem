@@ -13,7 +13,7 @@ const LibraryNavbar = () => {
           {/* Logo */}
           <div className="flex items-center space-x-2">
             <BookOpen className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold text-primary">SmartLibrary</span>
+            <span className="text-xl font-bold text-primary">KL SmartLibrary</span>
           </div>
 
           {/* Desktop Navigation */}
@@ -40,8 +40,8 @@ const LibraryNavbar = () => {
             <Button variant="ghost" size="sm">
               Sign In
             </Button>
-            <Button variant="hero" size="sm">
-              Join Library
+            <Button variant="hero" size="sm" className="bg-gradient-secondary text-secondary-foreground hover:shadow-secondary">
+              Join KL Library
             </Button>
           </div>
 
