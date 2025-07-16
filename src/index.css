@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* KL University-inspired Design System */
+
+@layer base {
+  :root {
+    /* KL University Color Palette */
+    --background: 0 0% 100%;
+    --foreground: 210 25% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 210 25% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 25% 15%;
+
+    /* KL Orange - Primary Brand (Saffron/Orange) */
+    --primary: 22 95% 55%;
+    --primary-foreground: 0 0% 98%;
+    --primary-glow: 25 100% 65%;
+
+    /* KL Deep Blue - Secondary */
+    --secondary: 210 85% 25%;
+    --secondary-foreground: 0 0% 98%;
+
+    /* Soft Academic Grays */
+    --muted: 210 15% 95%;
+    --muted-foreground: 210 15% 45%;
+
+    /* Golden Accent - Excellence/Achievement */
+    --accent: 45 85% 55%;
+    --accent-foreground: 210 25% 15%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 210 20% 88%;
+    --input: 210 20% 94%;
+    --ring: 22 95% 55%;
+
+    /* KL University Design System Extensions */
+    --gradient-hero: linear-gradient(135deg, hsl(22 95% 55%), hsl(210 85% 25%));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 15% 98%));
+    --gradient-accent: linear-gradient(135deg, hsl(22 95% 55%), hsl(25 100% 65%));
+    --gradient-secondary: linear-gradient(135deg, hsl(210 85% 25%), hsl(220 80% 35%));
+    
+    /* KL-inspired shadows */
+    --shadow-book: 0 4px 20px -2px hsl(22 95% 55% / 0.15);
+    --shadow-card: 0 2px 10px -2px hsl(210 25% 15% / 0.08);
+    --shadow-glow: 0 0 30px hsl(22 95% 55% / 0.3);
+    --shadow-secondary: 0 4px 15px -2px hsl(210 85% 25% / 0.2);
+    
+    /* Smooth academic transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 210 25% 8%;
+    --foreground: 0 0% 95%;
+
+    --card: 210 25% 8%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 210 25% 8%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 25 100% 65%;
+    --primary-foreground: 210 25% 8%;
+
+    --secondary: 210 85% 15%;
+    --secondary-foreground: 0 0% 95%;
+
+    --muted: 210 25% 12%;
+    --muted-foreground: 210 15% 65%;
+
+    --accent: 45 85% 60%;
+    --accent-foreground: 210 25% 8%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 95%;
+
+    --border: 210 25% 15%;
+    --input: 210 25% 15%;
+    --ring: 22 95% 55%;
+    --sidebar-background: 210 25% 8%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 22 95% 55%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 210 25% 12%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 210 25% 15%;
+    --sidebar-ring: 22 95% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
