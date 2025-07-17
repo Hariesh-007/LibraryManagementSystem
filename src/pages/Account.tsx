@@ -4,6 +4,7 @@ import LibraryNavbar from '@/components/LibraryNavbar';
 import LibraryFooter from '@/components/LibraryFooter';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 
 type Book = {
   id: string;
@@ -33,6 +34,16 @@ const Account = () => {
   const [studentInfo, setStudentInfo] = useState<any>(null);
   const [staffInfo, setStaffInfo] = useState<any>(null);
   const [recommended, setRecommended] = useState<Book[]>([]);
+
+  // Student management (staff only)
+  const [students, setStudents] = useState([]);
+  const [studentSearch, setStudentSearch] = useState('');
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [borrowHistory, setBorrowHistory] = useState([]);
+  const [loadingStudents, setLoadingStudents] = useState(false);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [studentError, setStudentError] = useState('');
+  const [blocking, setBlocking] = useState({});
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -105,6 +116,50 @@ const Account = () => {
     };
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    if (role === 'staff') fetchStudents();
+  }, [role]);
+
+  const fetchStudents = async () => {
+    setLoadingStudents(true);
+    setStudentError('');
+    const { data, error } = await supabase.from('students').select('*');
+    if (error) setStudentError(error.message);
+    else setStudents(data || []);
+    setLoadingStudents(false);
+  };
+
+  const handleStudentSelect = async (student) => {
+    setSelectedStudent(student);
+    setLoadingHistory(true);
+    setBorrowHistory([]);
+    const { data, error } = await supabase
+      .from('borrow_records')
+      .select('id, book_id, borrowed_at, due_at, returned_at, status, books(title, author)')
+      .eq('student_id', student.id);
+    if (!error) setBorrowHistory(data || []);
+    setLoadingHistory(false);
+  };
+
+  const handleBlockToggle = async (student, block) => {
+    setBlocking(b => ({ ...b, [student.id]: true }));
+    const { error } = await supabase
+      .from('students')
+      .update({ blocked: block })
+      .eq('id', student.id);
+    if (error) setStudentError(error.message);
+    else fetchStudents();
+    setBlocking(b => ({ ...b, [student.id]: false }));
+  };
+
+  const filteredStudents = students.filter(s => {
+    const q = studentSearch.toLowerCase();
+    return (
+      s.name?.toLowerCase().includes(q) ||
+      s.email?.toLowerCase().includes(q)
+    );
+  });
 
   if (!authChecked) {
     return (
@@ -387,6 +442,99 @@ const Account = () => {
                 <li className="bg-blue-50 border-l-4 border-blue-500 rounded p-4 text-blue-900 font-medium shadow-sm">Overdue Books (Coming Soon)</li>
                 <li className="bg-blue-50 border-l-4 border-blue-500 rounded p-4 text-blue-900 font-medium shadow-sm">Analytics & Reports (Coming Soon)</li>
               </ul>
+              {role === 'staff' && (
+                <div className="w-full max-w-4xl mt-8">
+                  <h2 className="text-2xl font-semibold mb-4">Student Management</h2>
+                  <Input
+                    placeholder="Search students by name or email..."
+                    value={studentSearch}
+                    onChange={e => setStudentSearch(e.target.value)}
+                    className="mb-2"
+                  />
+                  {studentError && <div className="text-red-600 text-sm mb-2">{studentError}</div>}
+                  {loadingStudents ? <p>Loading students...</p> : (
+                    <Table className="mb-6">
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Action</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredStudents.length === 0 ? (
+                          <TableRow><TableCell colSpan={4} className="text-center">No students found.</TableCell></TableRow>
+                        ) : filteredStudents.map(s => {
+                          // Check if student has overdue books
+                          const hasOverdue = s.id && borrowHistory.some(r => r.student_id === s.id && r.status === 'overdue');
+                          return (
+                            <TableRow key={s.id}>
+                              <TableCell>{s.name}</TableCell>
+                              <TableCell>{s.email}</TableCell>
+                              <TableCell>
+                                {s.blocked ? <span className="text-red-600 font-semibold">Blocked</span> : <span className="text-green-700">Active</span>}
+                              </TableCell>
+                              <TableCell>
+                                {s.blocked ? (
+                                  <button
+                                    className="bg-green-600 text-white px-3 py-1 rounded mr-2"
+                                    disabled={blocking[s.id]}
+                                    onClick={() => handleBlockToggle(s, false)}
+                                  >
+                                    {blocking[s.id] ? 'Unblocking...' : 'Unblock'}
+                                  </button>
+                                ) : (
+                                  <button
+                                    className="bg-red-600 text-white px-3 py-1 rounded mr-2"
+                                    disabled={blocking[s.id] || !hasOverdue}
+                                    onClick={() => handleBlockToggle(s, true)}
+                                    title={hasOverdue ? '' : 'Can only block students with overdue books'}
+                                  >
+                                    {blocking[s.id] ? 'Blocking...' : 'Block'}
+                                  </button>
+                                )}
+                                <button className="bg-blue-600 text-white px-3 py-1 rounded" onClick={() => handleStudentSelect(s)}>View History</button>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  )}
+                  {selectedStudent && (
+                    <div className="mt-8">
+                      <h3 className="text-lg font-semibold mb-2">Borrowing History for {selectedStudent.name}</h3>
+                      {loadingHistory ? <p>Loading history...</p> : (
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Book</TableHead>
+                              <TableHead>Borrowed At</TableHead>
+                              <TableHead>Due At</TableHead>
+                              <TableHead>Returned At</TableHead>
+                              <TableHead>Status</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {borrowHistory.length === 0 ? (
+                              <TableRow><TableCell colSpan={5} className="text-center">No borrow records.</TableCell></TableRow>
+                            ) : borrowHistory.map(r => (
+                              <TableRow key={r.id}>
+                                <TableCell>{r.books?.title || r.book_id}</TableCell>
+                                <TableCell>{new Date(r.borrowed_at).toLocaleDateString()}</TableCell>
+                                <TableCell>{new Date(r.due_at).toLocaleDateString()}</TableCell>
+                                <TableCell>{r.returned_at ? new Date(r.returned_at).toLocaleDateString() : '-'}</TableCell>
+                                <TableCell>{r.status}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
