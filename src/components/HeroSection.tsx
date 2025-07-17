@@ -28,6 +28,7 @@ const HeroSection = () => {
   };
 
   const handleBrowseCatalog = () => {
+    // Replace with router navigation if available
     window.location.href = "/catalog";
   };
 

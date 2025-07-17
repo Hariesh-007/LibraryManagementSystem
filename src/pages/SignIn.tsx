@@ -38,7 +38,7 @@ const SignIn = () => {
 
     if (student && !studentError) {
       localStorage.setItem('student', JSON.stringify(student));
-      window.location.href = '/catalog'; // Redirect students to catalog
+      window.location.href = '/account';
       return;
     }
 
@@ -51,7 +51,7 @@ const SignIn = () => {
 
     if (staff && !staffError) {
       localStorage.setItem('staff', JSON.stringify(staff));
-      window.location.href = '/account'; // Redirect staff to their account page
+      window.location.href = '/staff-dashboard';
       return;
     }
 
