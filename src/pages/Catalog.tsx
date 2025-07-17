@@ -273,17 +273,17 @@ const Catalog = () => {
                       {role === 'staff' ? (
                         <div className="mt-2 text-blue-700 font-semibold">Staff cannot borrow or reserve books.</div>
                       ) : (
-                      <button
-                        className={`mt-2 px-4 py-2 rounded text-white ${book.available_copies && book.available_copies > 0 ? 'bg-primary hover:bg-primary/90' : 'bg-accent hover:bg-accent/80'}`}
+                        <button
+                          className={`mt-2 px-4 py-2 rounded text-white ${book.available_copies && book.available_copies > 0 ? 'bg-primary hover:bg-primary/90' : 'bg-accent hover:bg-accent/80'}`}
                           onClick={() => book.available_copies && book.available_copies > 0 ? handleBorrow(book) : handleReserve(book)}
                           disabled={!!existingReservations[book.id] || !!activeBorrows[book.id]}
-                      >
+                        >
                           {activeBorrows[book.id]
                             ? 'Already Borrowed'
                             : existingReservations[book.id]
-                          ? (existingReservations[book.id] === 'reserved' ? 'Already Reserved' : 'On Waitlist')
+                              ? (existingReservations[book.id] === 'reserved' ? 'Already Reserved' : 'On Waitlist')
                               : (book.available_copies && book.available_copies > 0 ? 'Borrow' : 'Join Waitlist')}
-                      </button>
+                        </button>
                       )}
                     </div>
                   </li>

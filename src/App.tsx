@@ -10,6 +10,7 @@ import { supabase } from './lib/supabaseClient';
 import LibraryNavbar from "@/components/LibraryNavbar";
 import LibraryFooter from "@/components/LibraryFooter";
 import { BookOpen } from "lucide-react";
+import About from "./pages/About";
 import SearchResults from "./pages/SearchResults";
 import Catalog from "./pages/Catalog";
 import DigitalResources from "./pages/DigitalResources";
@@ -18,10 +19,6 @@ import StaffLanding from './pages/StaffLanding';
 import { Input } from "@/components/ui/input";
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Float, Box, Sphere } from '@react-three/drei';
-import ApproveReturns from './pages/ApproveReturns';
-import Borrowing from './pages/Borrowing';
-import Analytics from './pages/Analytics';
-import ManageBooks from './pages/ManageBooks';
 
 const queryClient = new QueryClient();
 
@@ -46,8 +43,6 @@ class CanvasErrorBoundary extends React.Component<React.PropsWithChildren<{}>, C
   }
 }
 
-// Placeholder pages for missing routes
-const About = () => <div style={{padding: 40, textAlign: 'center'}}><h1>About</h1><p>This is a placeholder for the About page.</p></div>;
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -121,7 +116,7 @@ const SignIn = () => {
           <h1 className="text-3xl font-bold text-primary mb-1">Sign In</h1>
           <p className="text-muted-foreground text-base">Welcome back to <span className="font-semibold text-accent">KL SmartLibrary</span></p>
         </div>
-      {!showForgot ? (
+        {!showForgot ? (
           <form onSubmit={handleSignIn} className="w-full space-y-5">
             <div>
               <label className="block mb-1 font-medium text-primary">Email</label>
@@ -133,15 +128,15 @@ const SignIn = () => {
             </div>
             {error && <div className="text-red-600 text-sm text-center font-medium mt-2">{error}</div>}
             <button type="submit" disabled={loading} className="w-full py-3 rounded-lg bg-primary text-white font-semibold text-lg shadow-md hover:bg-primary/90 transition-bounce disabled:opacity-60 mt-2">
-            {loading ? 'Signing in...' : 'Sign In'}
-          </button>
+              {loading ? 'Signing in...' : 'Sign In'}
+            </button>
             <div className="flex justify-between items-center mt-2">
               <button type="button" className="text-blue-600 hover:underline text-sm" onClick={() => setShowForgot(true)}>
-              Forgot Password?
-            </button>
-          </div>
-        </form>
-      ) : (
+                Forgot Password?
+              </button>
+            </div>
+          </form>
+        ) : (
           <form onSubmit={handleForgotPassword} className="w-full space-y-5">
             <div>
               <label className="block mb-1 font-medium text-primary">Email</label>
@@ -150,15 +145,15 @@ const SignIn = () => {
             {resetMsg && <div className="text-green-600 text-sm text-center font-medium mt-2">{resetMsg}</div>}
             {error && <div className="text-red-600 text-sm text-center font-medium mt-2">{error}</div>}
             <button type="submit" disabled={resetLoading} className="w-full py-3 rounded-lg bg-blue-600 text-white font-semibold text-lg shadow-md hover:bg-blue-700 transition-bounce disabled:opacity-60 mt-2">
-            {resetLoading ? 'Sending...' : 'Send Reset Email'}
-          </button>
+              {resetLoading ? 'Sending...' : 'Send Reset Email'}
+            </button>
             <div className="flex justify-between items-center mt-2">
               <button type="button" className="text-primary hover:underline text-sm" onClick={() => setShowForgot(false)}>
-              Back to Sign In
-            </button>
-          </div>
-        </form>
-      )}
+                Back to Sign In
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );
@@ -283,9 +278,8 @@ const StaffLogin = () => {
     // Set session role
     localStorage.setItem('role', 'staff');
     localStorage.setItem('staff_name', data.name);
-    // Redirect to /account and stop further execution
-    navigate('/account');
-    return;
+    setLoading(false);
+    navigate('/staff-dashboard');
   };
 
   return (
@@ -743,12 +737,10 @@ const App = () => {
           <Route path="/schedule-demo" element={<ScheduleDemo />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/staff-login" element={<StaffLogin />} />
+            <Route path="/staff-dashboard" element={<StaffDashboard role={role} />} />
           <Route path="/student-dashboard" element={<StudentDashboard />} />
           <Route path="/search" element={<SearchResults />} />
-          <Route path="/staff/approve-returns" element={<ApproveReturns />} />
-          <Route path="/staff/borrowing" element={<Borrowing />} />
-          <Route path="/staff/analytics" element={<Analytics />} />
-          <Route path="/staff/manage-books" element={<ManageBooks />} />
+            <Route path="/StaffLanding" element={<StaffLanding />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
