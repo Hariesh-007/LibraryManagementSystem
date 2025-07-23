@@ -59,29 +59,39 @@ const SignIn = () => {
 
   const handleSignIn = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
-    const { error, data } = await supabase.auth.signInWithPassword({ email, password });
-    console.log("[SignIn] signInWithPassword result:", { error, data });
-    setLoading(false);
-    if (error) {
-      setError(error.message);
-    } else {
-      // Get user role by checking students and staff tables
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      console.log("[SignIn] Fetched user after sign-in:", user, "Error:", userError);
+    try {
+      setLoading(true);
+      setError('');
       
-      if (!user) {
-        setError('User not found');
-        return;
+      // Test Supabase connection first
+      const { error: healthError } = await supabase.from('students').select('count').limit(1);
+      if (healthError) {
+        console.error('Supabase connection error:', healthError);
+        throw new Error('Unable to connect to the server. Please try again.');
+      }
+
+      const { error, data } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password
+      });
+      
+      console.log("[SignIn] signInWithPassword result:", { error, data });
+      
+      if (error) {
+        throw error;
+      }
+
+      if (!data.user) {
+        throw new Error('User not found');
       }
 
       // Check students table
       const { data: student, error: studentError } = await supabase
         .from('students')
         .select('id')
-        .eq('email', user.email)
+        .eq('email', data.user.email)
         .single();
+      
       console.log("[SignIn] Student table lookup:", student, "Error:", studentError);
       
       if (student) {
@@ -94,8 +104,9 @@ const SignIn = () => {
       const { data: staff, error: staffError } = await supabase
         .from('staff')
         .select('id')
-        .eq('email', user.email)
+        .eq('email', data.user.email)
         .single();
+      
       console.log("[SignIn] Staff table lookup:", staff, "Error:", staffError);
       
       if (staff) {
@@ -107,115 +118,89 @@ const SignIn = () => {
       // If user exists in neither table
       console.log("[SignIn] User not found in students or staff table, navigating to home");
       navigate('/');
-    }
-  };
 
-  const handleForgotPassword = async (e) => {
-    e.preventDefault();
-    setResetMsg('');
-    setError('');
-    setResetLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-      redirectTo: window.location.origin + '/reset-password',
-    });
-    setResetLoading(false);
-    if (error) {
-      setError(error.message);
-    } else {
-      setResetMsg('Password reset email sent! Check your inbox.');
-    }
-  };
-
-  // Defensive 3D Canvas rendering
-  const render3DBackground = () => {
-    try {
-  return (
-      <CanvasErrorBoundary>
-        <div className="absolute inset-0 z-0 pointer-events-none">
-            <React.Suspense fallback={null}>
-          <Canvas camera={{ position: [0, 0, 8], fov: 60 }}>
-            <ambientLight intensity={0.7} />
-            <directionalLight position={[5, 5, 5]} intensity={0.7} />
-            <Float speed={1.2} rotationIntensity={0.5} floatIntensity={1.5}>
-              <Box args={[1.2, 1.2, 1.2]} position={[-2, 1, 0]}>
-                <meshStandardMaterial color="#f59e42" metalness={0.3} roughness={0.4} />
-              </Box>
-            </Float>
-            <Float speed={1.5} rotationIntensity={0.7} floatIntensity={1.2}>
-              <Sphere args={[0.8, 32, 32]} position={[2, -1, 0]}>
-                <meshStandardMaterial color="#2563eb" metalness={0.2} roughness={0.5} />
-              </Sphere>
-            </Float>
-            <Float speed={1.1} rotationIntensity={0.6} floatIntensity={1.3}>
-              <Box args={[0.7, 0.7, 0.7]} position={[0, 2, -1]}>
-                <meshStandardMaterial color="#fbbf24" metalness={0.2} roughness={0.6} />
-              </Box>
-            </Float>
-            <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.7} />
-          </Canvas>
-            </React.Suspense>
-        </div>
-      </CanvasErrorBoundary>
-      );
-    } catch (e) {
-      console.error("3D Canvas rendering error:", e);
-      return null;
+    } catch (err) {
+      console.error('Sign in error:', err);
+      setError(err.message || 'An error occurred during sign in. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-blue-200 to-accent/10 overflow-hidden">
-      {/* 3D Animated Background with Error Boundary */}
-      {render3DBackground()}
-      {/* Sign In Card */}
-      <div className="relative z-10 w-full max-w-md mx-auto bg-white/90 rounded-2xl shadow-2xl p-8 md:p-10 flex flex-col items-center backdrop-blur-md border border-blue-100">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-blue-200 to-accent/10">
+      <div className="w-full max-w-md mx-auto bg-white/90 rounded-2xl shadow-2xl p-8 md:p-10 flex flex-col items-center backdrop-blur-md border border-blue-100">
         <div className="flex flex-col items-center mb-6">
           <img src="/kl-university-logo.svg" alt="KL University Logo" className="h-14 mb-2" />
           <h1 className="text-3xl font-bold text-primary mb-1">Sign In</h1>
           <p className="text-muted-foreground text-base">Welcome back to <span className="font-semibold text-accent">KL SmartLibrary</span></p>
         </div>
-        {!showForgot ? (
-          <form onSubmit={handleSignIn} className="w-full space-y-5">
-            <div>
-              <label className="block mb-1 font-medium text-primary">Email</label>
-              <Input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required autoFocus />
+        
+        <form onSubmit={handleSignIn} className="w-full space-y-5">
+          <div>
+            <label className="block mb-1 font-medium text-primary">Email</label>
+            <Input 
+              type="email" 
+              placeholder="Email" 
+              value={email} 
+              onChange={e => setEmail(e.target.value)} 
+              required 
+              autoFocus 
+              disabled={loading}
+            />
+          </div>
+          <div>
+            <label className="block mb-1 font-medium text-primary">Password</label>
+            <Input 
+              type="password" 
+              placeholder="Password" 
+              value={password} 
+              onChange={e => setPassword(e.target.value)} 
+              required 
+              disabled={loading}
+            />
+          </div>
+          
+          {error && (
+            <div className="text-red-600 text-sm text-center font-medium bg-red-50 p-3 rounded-lg border border-red-200">
+              {error}
             </div>
-            <div>
-              <label className="block mb-1 font-medium text-primary">Password</label>
-              <Input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
-            </div>
-            {error && <div className="text-red-600 text-sm text-center font-medium mt-2">{error}</div>}
-            <button type="submit" disabled={loading} className="w-full py-3 rounded-lg bg-primary text-white font-semibold text-lg shadow-md hover:bg-primary/90 transition-bounce disabled:opacity-60 mt-2">
-              {loading ? 'Signing in...' : 'Sign In'}
+          )}
+          
+          <button 
+            type="submit" 
+            disabled={loading} 
+            className="w-full py-3 rounded-lg bg-primary text-white font-semibold text-lg shadow-md hover:bg-primary/90 transition-bounce disabled:opacity-60 mt-2"
+          >
+            {loading ? (
+              <div className="flex items-center justify-center">
+                <svg className="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                </svg>
+                Signing in...
+              </div>
+            ) : (
+              'Sign In'
+            )}
+          </button>
+          
+          <div className="flex justify-between items-center mt-2">
+            <button 
+              type="button" 
+              className="text-blue-600 hover:underline text-sm" 
+              onClick={() => setShowForgot(true)}
+              disabled={loading}
+            >
+              Forgot Password?
             </button>
-            <div className="flex justify-between items-center mt-2">
-              <button type="button" className="text-blue-600 hover:underline text-sm" onClick={() => setShowForgot(true)}>
-                Forgot Password?
-              </button>
-            </div>
-          </form>
-        ) : (
-          <form onSubmit={handleForgotPassword} className="w-full space-y-5">
-            <div>
-              <label className="block mb-1 font-medium text-primary">Email</label>
-              <Input type="email" placeholder="Enter your email" value={resetEmail} onChange={e => setResetEmail(e.target.value)} required />
-            </div>
-            {resetMsg && <div className="text-green-600 text-sm text-center font-medium mt-2">{resetMsg}</div>}
-            {error && <div className="text-red-600 text-sm text-center font-medium mt-2">{error}</div>}
-            <button type="submit" disabled={resetLoading} className="w-full py-3 rounded-lg bg-blue-600 text-white font-semibold text-lg shadow-md hover:bg-blue-700 transition-bounce disabled:opacity-60 mt-2">
-              {resetLoading ? 'Sending...' : 'Send Reset Email'}
-            </button>
-            <div className="flex justify-between items-center mt-2">
-              <button type="button" className="text-primary hover:underline text-sm" onClick={() => setShowForgot(false)}>
-                Back to Sign In
-              </button>
-            </div>
-          </form>
-        )}
+          </div>
+        </form>
       </div>
     </div>
   );
 };
+
 const GetStarted = () => {
   const navigate = useNavigate();
   return (
