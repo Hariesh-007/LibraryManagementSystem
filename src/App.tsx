@@ -22,6 +22,7 @@ import { OrbitControls, Float, Box, Sphere } from '@react-three/drei';
 import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 import { loadStripe } from '@stripe/stripe-js';
+import { Analytics } from '@vercel/analytics/react';
 
 const queryClient = new QueryClient();
 
@@ -1234,7 +1235,6 @@ const App = () => {
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      {/* Removed <BrowserRouter> wrapper here, as it should only be in main.tsx */}
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/catalog" element={<Catalog />} />
@@ -1260,6 +1260,7 @@ const App = () => {
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
+      <Analytics />
     </TooltipProvider>
   </QueryClientProvider>
 );
