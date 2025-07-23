@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, BookOpen, User, Menu, X } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const LibraryNavbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -76,16 +76,16 @@ const LibraryNavbar = () => {
     }
   };
 
-  const handleNav = (path) => {
-    window.location.href = path;
+  const handleNav = (path: string) => {
+    navigate(path);
   };
 
   const handleSignIn = () => {
-    window.location.href = "/signin";
+    navigate('/signin');
   };
 
   const handleJoin = () => {
-    window.location.href = "/join";
+    navigate('/join');
   };
 
   const handleLogout = async () => {
@@ -93,7 +93,7 @@ const LibraryNavbar = () => {
     setUser(null);
     setUserName("");
     localStorage.removeItem('user_name');
-    window.location.href = "/";
+    navigate('/');
   };
 
   return (
@@ -103,30 +103,27 @@ const LibraryNavbar = () => {
           {/* Logo */}
           <div className="flex items-center space-x-2">
             <BookOpen className="h-8 w-8 text-primary" />
-            <span
+            <Link
+              to="/"
               className="cursor-pointer font-bold text-2xl text-primary"
-              onClick={() => {
-                // Stop all ongoing operations by reloading the app state
-                window.location.href = '/';
-              }}
             >
               KL SmartLibrary
-            </span>
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {roleChecked && role !== 'staff' && (
-              <a href="/catalog" className="text-foreground hover:text-primary transition-smooth">Catalog</a>
+              <Link to="/catalog" className="text-foreground hover:text-primary transition-smooth">Catalog</Link>
             )}
             {roleChecked && (
-              <a href="/digital-resources" className="text-foreground hover:text-primary transition-smooth">Digital Resources</a>
+              <Link to="/digital-resources" className="text-foreground hover:text-primary transition-smooth">Digital Resources</Link>
             )}
             {roleChecked && (
-              <a href="/account" className="text-foreground hover:text-primary transition-smooth">My Account</a>
+              <Link to="/account" className="text-foreground hover:text-primary transition-smooth">My Account</Link>
             )}
             {roleChecked && (
-              <a href="/about" className="text-foreground hover:text-primary transition-smooth">About</a>
+              <Link to="/about" className="text-foreground hover:text-primary transition-smooth">About</Link>
             )}
           </div>
 
@@ -195,16 +192,16 @@ const LibraryNavbar = () => {
               {/* Mobile Navigation Links */}
               <div className="flex flex-col space-y-2">
                 {roleChecked && role !== 'staff' && (
-                  <a href="/catalog" className="px-2 py-2 text-foreground hover:text-primary transition-smooth">Catalog</a>
+                  <Link to="/catalog" className="px-2 py-2 text-foreground hover:text-primary transition-smooth">Catalog</Link>
                 )}
                 {roleChecked && (
-                  <a href="/digital-resources" className="px-2 py-2 text-foreground hover:text-primary transition-smooth">Digital Resources</a>
+                  <Link to="/digital-resources" className="px-2 py-2 text-foreground hover:text-primary transition-smooth">Digital Resources</Link>
                 )}
                 {roleChecked && (
-                  <a href="/account" className="px-2 py-2 text-foreground hover:text-primary transition-smooth">My Account</a>
+                  <Link to="/account" className="px-2 py-2 text-foreground hover:text-primary transition-smooth">My Account</Link>
                 )}
                 {roleChecked && (
-                  <a href="/about" className="px-2 py-2 text-foreground hover:text-primary transition-smooth">About</a>
+                  <Link to="/about" className="px-2 py-2 text-foreground hover:text-primary transition-smooth">About</Link>
                 )}
               </div>
               
