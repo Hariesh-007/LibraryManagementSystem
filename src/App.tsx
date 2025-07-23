@@ -20,12 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Float, Box, Sphere } from '@react-three/drei';
 import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import AcademicSupport from './pages/AcademicSupport';
-import CitationHelp from "./pages/CitationHelp";
-import ResearchAssistance from "./pages/ResearchAssistance";
-import HelpSupport from "./pages/HelpSupport";
-import EventsWorkshops from "./pages/EventsWorkshops";
-import AuthRedirectHandler from "./pages/AuthRedirectHandler";
+
 import { loadStripe } from '@stripe/stripe-js';
 
 const queryClient = new QueryClient();
@@ -1257,7 +1252,7 @@ const App = () => {
       <Sonner />
       {/* Removed <BrowserRouter> wrapper here, as it should only be in main.tsx */}
       <Routes>
-        <Route path="/" element={<AuthRedirectHandler />} />
+        <Route path="/" element={<Index />} />
         <Route path="/catalog" element={<Catalog />} />
         <Route path="/digital-resources" element={<DigitalResources />} />
         <Route path="/account" element={<Account />} />
@@ -1272,11 +1267,7 @@ const App = () => {
         <Route path="/student-dashboard" element={<StudentDashboard />} />
         <Route path="/search" element={<SearchResults />} />
         <Route path="/StaffLanding" element={<StaffLanding />} />
-        <Route path="/academic-support" element={<AcademicSupport />} />
-        <Route path="/citation-help" element={<CitationHelp />} />
-        <Route path="/research-assistance" element={<ResearchAssistance />} />
-        <Route path="/help-support" element={<HelpSupport />} />
-        <Route path="/events" element={<EventsWorkshops />} />
+
         {/* Oversee Borrow Requests route */}
         <Route path="/oversee-borrow-requests" element={<OverseeBorrowRequests />} />
         <Route path="/analytics" element={<Analytics />} />
