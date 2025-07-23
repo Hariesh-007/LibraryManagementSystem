@@ -11,7 +11,7 @@ import {
   Users,
   Clock
 } from "lucide-react";
-import { useCallback, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from '@/lib/supabaseClient';
 
 const FeaturesSection = () => {

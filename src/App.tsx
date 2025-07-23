@@ -251,7 +251,6 @@ const GetStarted = () => {
     </div>
   );
 };
-const ScheduleDemo = () => <div style={{padding: 40, textAlign: 'center'}}><h1>Schedule Demo</h1><p>This is a placeholder for the Schedule Demo page.</p></div>;
 
 const ResetPassword = () => {
   const [password, setPassword] = useState('');
@@ -1260,7 +1259,7 @@ const App = () => {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/get-started" element={<GetStarted />} />
-        <Route path="/schedule-demo" element={<ScheduleDemo />} />
+
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/staff-login" element={<StaffLogin />} />
         <Route path="/staff-dashboard" element={<StaffDashboard role={role} />} />
