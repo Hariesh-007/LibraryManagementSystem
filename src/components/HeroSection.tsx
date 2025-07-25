@@ -5,8 +5,10 @@ import heroImage from "@/assets/library-hero.jpg";
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
+import { useToast } from "@/hooks/use-toast";
 
 const HeroSection = () => {
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
@@ -23,7 +25,12 @@ const HeroSection = () => {
     if (searchTerm.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
     } else {
-      alert("Please enter a search term.");
+      toast({
+        title: "Search Required",
+        description: "Please enter a search term.",
+        variant: "destructive",
+        duration: 3000,
+      });
     }
   };
 

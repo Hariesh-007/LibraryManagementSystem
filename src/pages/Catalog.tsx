@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabaseClient';
 import LibraryNavbar from '@/components/LibraryNavbar';
 import LibraryFooter from '@/components/LibraryFooter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 
 interface Book {
   id: string;
@@ -16,11 +17,11 @@ interface Book {
 }
 
 const Catalog = () => {
+  const { toast } = useToast();
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(false);
-  const [feedback, setFeedback] = useState('');
   const [existingReservations, setExistingReservations] = useState<{ [bookId: string]: string }>({});
   const [activeBorrows, setActiveBorrows] = useState<{ [bookId: string]: boolean }>({});
   const [role, setRole] = useState<'student' | 'staff' | null>(null);
@@ -141,10 +142,14 @@ const Catalog = () => {
   }, []);
 
   const handleReserve = async (book: Book) => {
-    setFeedback('');
     const { data: authData } = await supabase.auth.getUser();
     if (!authData.user) {
-      setFeedback('Please sign in to reserve books.');
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to reserve books.",
+        variant: "destructive",
+        duration: 4000,
+      });
       return;
     }
     const status = (book.available_copies && book.available_copies > 0) ? 'reserved' : 'waitlisted';
@@ -154,22 +159,40 @@ const Catalog = () => {
       status,
     });
     if (error) {
-      setFeedback('Failed to reserve. You may already have a reservation or waitlist for this book.');
+      toast({
+        title: "Reservation Failed",
+        description: "Failed to reserve. You may already have a reservation or waitlist for this book.",
+        variant: "destructive",
+        duration: 4000,
+      });
     } else {
-      setFeedback(status === 'reserved' ? 'Book reserved successfully!' : 'Added to waitlist.');
+      toast({
+        title: "Success!",
+        description: status === 'reserved' ? 'Book reserved successfully!' : 'Added to waitlist.',
+        duration: 3000,
+      });
     }
   };
 
   const handleBorrow = async (book: Book) => {
-    setFeedback('');
     const { data: authData } = await supabase.auth.getUser();
     if (!authData.user) {
-      setFeedback('Please sign in to borrow books.');
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to borrow books.",
+        variant: "destructive",
+        duration: 4000,
+      });
       return;
     }
     // Check again if available
     if (!book.available_copies || book.available_copies < 1) {
-      setFeedback('No copies available to borrow.');
+      toast({
+        title: "Book Unavailable",
+        description: "No copies available to borrow.",
+        variant: "destructive",
+        duration: 4000,
+      });
       return;
     }
     // Look up student id from students table using email
@@ -179,7 +202,12 @@ const Catalog = () => {
       .eq('email', authData.user.email)
       .single();
     if (studentLookupError || !studentRow) {
-      setFeedback('Student record not found. Please contact the library.');
+      toast({
+        title: "Student Record Error",
+        description: "Student record not found. Please contact the library.",
+        variant: "destructive",
+        duration: 4000,
+      });
       return;
     }
     const studentId = studentRow.id;
@@ -191,14 +219,53 @@ const Catalog = () => {
       .eq('book_id', book.id)
       .is('returned_at', null);
     if (borrowCheckError) {
-      setFeedback('Error checking existing borrows: ' + (borrowCheckError.message || JSON.stringify(borrowCheckError)));
+      toast({
+        title: "System Error",
+        description: "Error checking existing borrows. Please try again.",
+        variant: "destructive",
+        duration: 4000,
+      });
       console.error('Supabase borrow check error:', borrowCheckError);
       return;
     }
     if (existingBorrows && existingBorrows.length > 0) {
-      setFeedback('You already have an active borrow for this book.');
+      toast({
+        title: "Already Borrowed",
+        description: "You already have an active borrow for this book.",
+        variant: "destructive",
+        duration: 4000,
+      });
       return;
     }
+    
+    // Check total number of active borrows (4-book limit)
+    const { data: allActiveBorrows, error: activeBorrowsError } = await supabase
+      .from('borrow_records')
+      .select('id')
+      .eq('student_id', studentId)
+      .is('returned_at', null);
+    
+    if (activeBorrowsError) {
+      toast({
+        title: "System Error",
+        description: "Error checking your current borrows. Please try again.",
+        variant: "destructive",
+        duration: 4000,
+      });
+      console.error('Supabase active borrows check error:', activeBorrowsError);
+      return;
+    }
+    
+    if (allActiveBorrows && allActiveBorrows.length >= 4) {
+      toast({
+        title: "Borrowing Limit Reached",
+        description: "You have reached the maximum limit of 4 borrowed books. Please return a book before borrowing another.",
+        variant: "destructive",
+        duration: 4000,
+      });
+      return;
+    }
+    
     // Set due date (e.g., 14 days from now)
     const borrowedAt = new Date();
     const dueAt = new Date();
@@ -212,7 +279,12 @@ const Catalog = () => {
       status: 'borrowed',
     });
     if (borrowError) {
-      setFeedback('Failed to borrow: ' + (borrowError.message || JSON.stringify(borrowError)));
+      toast({
+        title: "Borrowing Failed",
+        description: "Failed to borrow book. Please try again.",
+        variant: "destructive",
+        duration: 4000,
+      });
       console.error('Supabase borrow insert error:', borrowError);
       return;
     }
@@ -221,10 +293,19 @@ const Catalog = () => {
       available_copies: (book.available_copies || 1) - 1
     }).eq('id', book.id);
     if (updateError) {
-      setFeedback('Failed to update book availability.');
+      toast({
+        title: "Update Failed",
+        description: "Failed to update book availability. Please contact support.",
+        variant: "destructive",
+        duration: 4000,
+      });
       return;
     }
-    setFeedback('Book borrowed successfully!');
+    toast({
+      title: "Success!",
+      description: "Book borrowed successfully!",
+      duration: 3000,
+    });
     // Refresh book list and borrows
     setTimeout(() => window.location.reload(), 1000);
   };
@@ -290,7 +371,6 @@ const Catalog = () => {
                 ))}
               </ul>
             )}
-            {feedback && <div className="mt-4 text-center text-accent font-semibold">{feedback}</div>}
           </div>
         )}
       </main>

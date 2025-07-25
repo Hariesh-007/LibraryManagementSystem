@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route, useNavigate, Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import React, { useState, useEffect } from 'react';
@@ -21,8 +22,7 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Float, Box, Sphere } from '@react-three/drei';
 import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
-import { loadStripe } from '@stripe/stripe-js';
-import { Analytics } from '@vercel/analytics/react';
+import { Analytics as VercelAnalytics } from '@vercel/analytics/react';
 
 const queryClient = new QueryClient();
 
@@ -459,6 +459,7 @@ const calculateFine = (dueDate: string, returnedDate?: string): number => {
 
 const StudentDashboard = () => {
   console.log("[StudentDashboard] Rendered");
+  const { toast } = useToast();
   const [user, setUser] = useState(null);
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -745,7 +746,11 @@ const StudentDashboard = () => {
                   e.currentTarget.style.backgroundColor = '#2563eb';
                 }} onClick={() => {
                   // TODO: Implement borrow functionality
-                  alert(`Borrow request for "${b.title}" will be implemented soon!`);
+                  toast({
+                    title: "Feature Coming Soon",
+                    description: `Borrow request for "${b.title}" will be implemented soon!`,
+                    duration: 3000,
+                  });
                 }}>
                   Borrow
                 </button>
@@ -1260,7 +1265,7 @@ const App = () => {
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <Analytics />
+      <VercelAnalytics />
     </TooltipProvider>
   </QueryClientProvider>
 );
@@ -1268,6 +1273,7 @@ const App = () => {
 
 // Oversee Borrow Requests Page
 const OverseeBorrowRequests = () => {
+  const { toast } = useToast();
   const [records, setRecords] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState('');
@@ -1293,8 +1299,50 @@ const OverseeBorrowRequests = () => {
   React.useEffect(() => { setPage(1); }, [filter, statusFilter]);
 
   const handleApprove = async (id) => {
+    // First, get the record details to check student
+    const { data: recordData, error: recordError } = await supabase
+      .from('borrow_records')
+      .select('student_id, students(student_id, name)')
+      .eq('id', id)
+      .single();
+    
+    if (recordError || !recordData) {
+      console.error('Error fetching record for approval:', recordError);
+      return;
+    }
+    
+    // Check how many active borrows this student already has
+    const { data: activeBorrows, error: activeBorrowsError } = await supabase
+      .from('borrow_records')
+      .select('id')
+      .eq('student_id', recordData.student_id)
+      .in('status', ['approved', 'borrowed'])
+      .is('returned_at', null);
+    
+    if (activeBorrowsError) {
+      console.error('Error checking active borrows:', activeBorrowsError);
+      return;
+    }
+    
+    // Check if approving this would exceed the 4-book limit
+    if (activeBorrows && activeBorrows.length >= 4) {
+      const studentInfo = Array.isArray(recordData.students) ? recordData.students[0] : recordData.students;
+      toast({
+        title: "Cannot Approve Request",
+        description: `Student ${studentInfo?.student_id || recordData.student_id} has already reached the maximum limit of 4 borrowed books.`,
+        variant: "destructive",
+        duration: 4000,
+      });
+      return;
+    }
+    
     await supabase.from('borrow_records').update({ status: 'approved' }).eq('id', id);
     setRecords(recs => recs.map(r => r.id === id ? { ...r, status: 'approved' } : r));
+    toast({
+      title: "Request Approved",
+      description: "Borrow request has been successfully approved.",
+      duration: 3000,
+    });
   };
   const handleReject = async (id) => {
     await supabase.from('borrow_records').update({ status: 'rejected' }).eq('id', id);

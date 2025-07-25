@@ -4,8 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Search, BookOpen, User, Menu, X } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { useNavigate, Link } from 'react-router-dom';
+import { useToast } from "@/hooks/use-toast";
 
 const LibraryNavbar = () => {
+  const { toast } = useToast();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [mobileSearchTerm, setMobileSearchTerm] = useState("");
@@ -64,7 +66,12 @@ const LibraryNavbar = () => {
     if (searchTerm.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
     } else {
-      alert("Please enter a search term.");
+      toast({
+        title: "Search Required",
+        description: "Please enter a search term.",
+        variant: "destructive",
+        duration: 3000,
+      });
     }
   };
 
@@ -72,7 +79,12 @@ const LibraryNavbar = () => {
     if (mobileSearchTerm.trim()) {
       navigate(`/search?q=${encodeURIComponent(mobileSearchTerm)}`);
     } else {
-      alert("Please enter a search term.");
+      toast({
+        title: "Search Required",
+        description: "Please enter a search term.",
+        variant: "destructive",
+        duration: 3000,
+      });
     }
   };
 
@@ -146,7 +158,12 @@ const LibraryNavbar = () => {
           <div className="hidden md:flex items-center space-x-3">
             {roleChecked && user ? (
               <>
-                <span className="font-semibold text-primary bg-muted px-3 py-1 rounded-full mr-2">{userName || "User"}</span>
+                <span 
+                  className="font-semibold text-primary bg-muted px-3 py-1 rounded-full mr-2 cursor-pointer hover:bg-muted/80 transition-colors" 
+                  onClick={() => navigate('/account')}
+                >
+                  {userName || "User"}
+                </span>
                 <Button variant="ghost" size="sm" onClick={handleLogout}>
                   Logout
                 </Button>
@@ -209,7 +226,12 @@ const LibraryNavbar = () => {
               <div className="flex flex-col space-y-2 pt-2">
                 {roleChecked && user ? (
                   <>
-                    <span className="font-semibold text-primary bg-muted px-3 py-1 rounded-full mb-1">{userName || "User"}</span>
+                    <span 
+                      className="font-semibold text-primary bg-muted px-3 py-1 rounded-full mb-1 cursor-pointer hover:bg-muted/80 transition-colors" 
+                      onClick={() => navigate('/account')}
+                    >
+                      {userName || "User"}
+                    </span>
                     <Button variant="ghost" className="justify-start" onClick={handleLogout}>
                       Logout
                     </Button>
