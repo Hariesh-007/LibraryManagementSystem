@@ -16,10 +16,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 210 25% 15%;
 
-    /* KL Orange - Primary Brand (Saffron/Orange) */
-    --primary: 22 95% 55%;
+    /* KL Red - Primary Brand */
+    --primary: 0 85% 55%;
     --primary-foreground: 0 0% 98%;
-    --primary-glow: 25 100% 65%;
+    --primary-glow: 0 100% 65%;
 
     /* KL Deep Blue - Secondary */
     --secondary: 210 85% 25%;
@@ -38,18 +38,18 @@
 
     --border: 210 20% 88%;
     --input: 210 20% 94%;
-    --ring: 22 95% 55%;
+    --ring: 0 85% 55%;
 
     /* KL University Design System Extensions */
-    --gradient-hero: linear-gradient(135deg, hsl(22 95% 55%), hsl(210 85% 25%));
+    --gradient-hero: linear-gradient(135deg, hsl(0 85% 55%), hsl(210 85% 25%));
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 15% 98%));
-    --gradient-accent: linear-gradient(135deg, hsl(22 95% 55%), hsl(25 100% 65%));
+    --gradient-accent: linear-gradient(135deg, hsl(0 85% 55%), hsl(0 100% 65%));
     --gradient-secondary: linear-gradient(135deg, hsl(210 85% 25%), hsl(220 80% 35%));
     
     /* KL-inspired shadows */
-    --shadow-book: 0 4px 20px -2px hsl(22 95% 55% / 0.15);
+    --shadow-book: 0 4px 20px -2px hsl(0 85% 55% / 0.15);
     --shadow-card: 0 2px 10px -2px hsl(210 25% 15% / 0.08);
-    --shadow-glow: 0 0 30px hsl(22 95% 55% / 0.3);
+    --shadow-glow: 0 0 30px hsl(0 85% 55% / 0.3);
     --shadow-secondary: 0 4px 15px -2px hsl(210 85% 25% / 0.2);
     
     /* Smooth academic transitions */
@@ -85,7 +85,7 @@
     --popover: 210 25% 8%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 25 100% 65%;
+    --primary: 0 100% 65%;
     --primary-foreground: 210 25% 8%;
 
     --secondary: 210 85% 15%;
@@ -102,15 +102,15 @@
 
     --border: 210 25% 15%;
     --input: 210 25% 15%;
-    --ring: 22 95% 55%;
+    --ring: 0 85% 55%;
     --sidebar-background: 210 25% 8%;
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 22 95% 55%;
+    --sidebar-primary: 0 85% 55%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 210 25% 12%;
     --sidebar-accent-foreground: 0 0% 95%;
     --sidebar-border: 210 25% 15%;
-    --sidebar-ring: 22 95% 55%;
+    --sidebar-ring: 0 85% 55%;
   }
 }
 

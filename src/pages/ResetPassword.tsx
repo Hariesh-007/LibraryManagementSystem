@@ -86,7 +86,7 @@ const ResetPassword = () => {
             </form>
           )}
           {success && (
-            <a href="/signin" className="block mt-4 text-primary font-semibold text-center">Back to Sign In</a>
+            <a href="/" className="block mt-4 text-primary font-semibold text-center">Back to Home</a>
           )}
         </div>
       </main>

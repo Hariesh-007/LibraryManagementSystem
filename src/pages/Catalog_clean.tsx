@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import LibraryNavbar from '@/components/LibraryNavbar';
 import LibraryFooter from '@/components/LibraryFooter';
-import AdvancedSearch from '@/components/AdvancedSearch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { BookOpen, Users, Calendar, Star, Heart, ShoppingCart } from 'lucide-react';
+import { Search, Filter, BookOpen, Users, Calendar } from 'lucide-react';
 
 type Book = {
   id: string;
@@ -21,32 +22,18 @@ type Book = {
   total_copies?: number;
   published_year?: number;
   publisher?: string;
-  rating?: number;
-  reviews_count?: number;
 };
-
-interface SearchFilters {
-  query: string;
-  category: string;
-  author: string;
-  year: string;
-  availability: string;
-}
 
 const Catalog = () => {
   const { toast } = useToast();
   const [books, setBooks] = useState<Book[]>([]);
-  const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentFilters, setCurrentFilters] = useState<SearchFilters>({
-    query: '',
-    category: '',
-    author: '',
-    year: '',
-    availability: ''
-  });
-  const [wishlist, setWishlist] = useState<Set<string>>(new Set());
-  const [reservations, setReservations] = useState<Set<string>>(new Set());
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [categories, setCategories] = useState<string[]>([]);
+  const [existingReservations, setExistingReservations] = useState<{ [bookId: string]: string }>({});
+  const [activeBorrows, setActiveBorrows] = useState<{ [bookId: string]: boolean }>({});
+  const [role, setRole] = useState<'student' | 'staff' | null>('student'); // Demo mode defaults to student
 
   useEffect(() => {
     const fetchBooks = async () => {

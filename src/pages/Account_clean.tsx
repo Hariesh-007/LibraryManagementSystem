@@ -137,7 +137,7 @@ const Account = () => {
       <LibraryNavbar />
       
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-red-600 to-purple-700 text-white py-16">
+      <div className="relative bg-gradient-to-r from-blue-600 to-purple-700 text-white py-16">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center gap-8">
             <Avatar className="w-24 h-24 border-4 border-white/20">

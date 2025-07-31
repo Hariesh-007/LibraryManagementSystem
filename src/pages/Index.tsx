@@ -1,132 +1,201 @@
-import LibraryNavbar from "@/components/LibraryNavbar";
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import HeroSection from "@/components/HeroSection";
 import FeaturesSection from "@/components/FeaturesSection";
+import LibraryNavbar from "@/components/LibraryNavbar";
 import LibraryFooter from "@/components/LibraryFooter";
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
-import { useNavigate } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Users, UserCheck, BookOpen, Settings, ToggleLeft, ToggleRight } from "lucide-react";
 
-// Inline Book type
- type Book = {
-   id: string;
-   title: string;
-   author?: string;
-   description?: string;
-   isbn?: string;
-   category?: string;
-   cover_url?: string;
-   available_copies?: number;
- };
+type Book = {
+  id: string;
+  title: string;
+  author?: string;
+  category?: string;
+  description?: string;
+  cover_url?: string;
+};
 
 const Index = () => {
-  const [user, setUser] = useState<any>(null);
-  const [isStudent, setIsStudent] = useState(false);
   const [recommended, setRecommended] = useState<Book[]>([]);
-  const [checkingRole, setCheckingRole] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [selectedRole, setSelectedRole] = useState<'student' | 'staff'>('student');
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUserAndRecommendations = async () => {
-      const { data: authData } = await supabase.auth.getUser();
-      if (!authData.user) {
-        setUser(null);
-        setIsStudent(false);
-        setRecommended([]);
-        setCheckingRole(false);
-        return;
-      }
-      setUser(authData.user);
-      // Check if staff
-      const { data: staff } = await supabase
-        .from('staff')
-        .select('id')
-        .eq('email', authData.user.email)
-        .single();
-      if (staff) {
-        navigate('/StaffLanding');
-        return;
-      }
-      // Check if student
-      const { data: student } = await supabase
-        .from('students')
-        .select('id')
-        .eq('email', authData.user.email)
-        .single();
-      if (student) {
-        setIsStudent(true);
-        // Fetch borrowed books
-        const { data: borrowedRes } = await supabase
-          .from('borrow_records')
-          .select('id, book:books(id, category)')
-          .eq('user_id', authData.user.id);
-        const borrowedBookIds = (borrowedRes || []).map((r: any) => r.book?.id).filter(Boolean);
-        const categories = Array.from(new Set((borrowedRes || []).map((r: any) => r.book?.category).filter(Boolean)));
-        if (categories.length > 0) {
-          const { data: recBooks } = await supabase
-            .from('books')
-            .select('*')
-            .in('category', categories)
-            .not('id', 'in', borrowedBookIds.length > 0 ? borrowedBookIds : [''])
-            .limit(10);
-          setRecommended(recBooks || []);
-        } else {
-          setRecommended([]);
+    const fetchRecommendations = async () => {
+      // Mock recommended books for demo
+      setRecommended([
+        {
+          id: '1',
+          title: 'Introduction to Algorithms',
+          author: 'Thomas H. Cormen',
+          category: 'Computer Science',
+          description: 'A comprehensive introduction to the modern study of computer algorithms.',
+          cover_url: '/placeholder.svg'
+        },
+        {
+          id: '2',
+          title: 'Clean Code',
+          author: 'Robert C. Martin',
+          category: 'Software Engineering',
+          description: 'A handbook of agile software craftsmanship.',
+          cover_url: '/placeholder.svg'
+        },
+        {
+          id: '3',
+          title: 'The Pragmatic Programmer',
+          author: 'David Thomas',
+          category: 'Software Engineering',
+          description: 'Your journey to mastery in software development.',
+          cover_url: '/placeholder.svg'
         }
-      } else {
-        setIsStudent(false);
-        setRecommended([]);
-      }
-      setCheckingRole(false);
+      ]);
+      setLoading(false);
     };
-    fetchUserAndRecommendations();
-  }, [navigate]);
 
-  if (checkingRole) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center">
-          <svg className="animate-spin h-10 w-10 text-primary mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-          </svg>
-          <div className="text-lg text-muted-foreground">Verifying your account, please wait...</div>
-        </div>
-      </div>
-    );
-  }
+    fetchRecommendations();
+  }, []);
+
+  const handleDashboardAccess = () => {
+    if (selectedRole === 'student') {
+      navigate('/student');
+    } else {
+      navigate('/staff');
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 to-purple-50">
       <LibraryNavbar />
-      <HeroSection />
-      {/* Recommended for You Section (students only) */}
-      {user && isStudent && (
-        <div className="container mx-auto px-4 py-8">
-          <div className="bg-card rounded-2xl shadow-lg p-6 mb-8">
-            <h2 className="text-xl font-semibold mb-4 text-accent">Recommended for You</h2>
-            {recommended.length === 0 ? (
-              <div className="text-muted-foreground">No recommendations yet. Borrow books to get personalized suggestions!</div>
-            ) : (
-              <div className="flex gap-4 overflow-x-auto pb-2">
-                {recommended.map(book => (
-                  <div key={book.id} className="min-w-[220px] bg-muted rounded-xl shadow p-4 flex flex-col items-center">
-                    <img
-                      src={book.cover_url || '/placeholder.svg'}
-                      alt={book.title}
-                      className="w-20 h-32 object-cover rounded mb-2 shadow"
-                    />
-                    <div className="font-semibold text-center mb-1">{book.title}</div>
-                    <div className="text-sm text-muted-foreground text-center mb-1">{book.author}</div>
-                    <div className="text-xs text-muted-foreground text-center">{book.category}</div>
+      <div className="flex flex-col min-h-screen">
+        <main className="flex-1">
+          <HeroSection />
+          
+          {/* Role Toggle Section */}
+          <section className="py-16 bg-gradient-to-r from-red-600 to-purple-700">
+            <div className="container mx-auto px-4">
+              <div className="max-w-3xl mx-auto text-center">
+                <h2 className="text-3xl font-bold mb-4 text-white">
+                  Dashboard Access
+                </h2>
+                <p className="text-red-100 text-lg mb-8">
+                  Toggle between Student and Staff dashboards
+                </p>
+                
+                {/* Single Toggle Button */}
+                <div className="flex flex-col items-center space-y-6">
+                  <div className="flex items-center space-x-4 bg-white/10 backdrop-blur-sm rounded-full p-2">
+                    <span className={`text-sm font-medium transition-colors ${
+                      selectedRole === 'student' ? 'text-white' : 'text-white/60'
+                    }`}>
+                      Student
+                    </span>
+                    
+                    <Button
+                      onClick={() => setSelectedRole(selectedRole === 'student' ? 'staff' : 'student')}
+                      variant="ghost"
+                      size="sm"
+                      className="p-2 hover:bg-white/20 rounded-full"
+                    >
+                      {selectedRole === 'student' ? (
+                        <ToggleLeft className="h-8 w-8 text-white" />
+                      ) : (
+                        <ToggleRight className="h-8 w-8 text-white" />
+                      )}
+                    </Button>
+                    
+                    <span className={`text-sm font-medium transition-colors ${
+                      selectedRole === 'staff' ? 'text-white' : 'text-white/60'
+                    }`}>
+                      Staff
+                    </span>
                   </div>
-                ))}
+
+                  {/* Dynamic Role Display */}
+                  <Card className="bg-white/95 backdrop-blur-sm max-w-md w-full">
+                    <CardHeader className="text-center pb-3">
+                      <div className="mx-auto mb-3">
+                        {selectedRole === 'student' ? (
+                          <Users className="h-12 w-12 text-red-600" />
+                        ) : (
+                          <UserCheck className="h-12 w-12 text-purple-600" />
+                        )}
+                      </div>
+                      <CardTitle className={`text-xl ${
+                        selectedRole === 'student' ? 'text-red-600' : 'text-purple-600'
+                      }`}>
+                        {selectedRole === 'student' ? 'Student Dashboard' : 'Staff Dashboard'}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-center">
+                      <p className="text-gray-600 mb-4">
+                        {selectedRole === 'student' 
+                          ? 'Access your personal library account, borrowed books, reading goals, and recommendations.'
+                          : 'Manage library operations, oversee borrow requests, and access administrative features.'
+                        }
+                      </p>
+                      
+                      <Button
+                        onClick={handleDashboardAccess}
+                        className={`w-full ${
+                          selectedRole === 'student'
+                            ? 'bg-red-600 hover:bg-red-700'
+                            : 'bg-purple-600 hover:bg-purple-700'
+                        }`}
+                      >
+                        <Settings className="w-4 h-4 mr-2" />
+                        Access {selectedRole === 'student' ? 'Student' : 'Staff'} Dashboard
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
-            )}
-          </div>
-        </div>
-      )}
-      <FeaturesSection />
-      <LibraryFooter />
+            </div>
+          </section>
+          
+          <FeaturesSection />
+          
+          {/* Recommended Books Section */}
+          <section className="py-16 bg-white">
+            <div className="container mx-auto px-4">
+              <h2 className="text-3xl font-bold text-center mb-12 text-primary">
+                Popular Books
+              </h2>
+              
+              {loading ? (
+                <div className="text-center">Loading recommendations...</div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {recommended.map((book) => (
+                    <div key={book.id} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                      <img 
+                        src={book.cover_url || '/placeholder.svg'} 
+                        alt={book.title}
+                        className="w-full h-48 object-cover"
+                      />
+                      <div className="p-6">
+                        <h3 className="text-xl font-semibold mb-2 text-primary">{book.title}</h3>
+                        <p className="text-muted-foreground mb-2">by {book.author}</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-accent bg-accent/10 px-2 py-1 rounded">
+                            {book.category}
+                          </span>
+                          <button className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 transition-colors">
+                            View Details
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        </main>
+        <LibraryFooter />
+      </div>
     </div>
   );
 };
